@@ -1,0 +1,39 @@
+---
+title: "TidyTueday_2019-50"
+author: "Adrienne"
+date: "December 9, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Tidy Tuesday Week 50
+
+# Workflow
+Considering this is my first time trying a Tidy Tuesday project, I am going to take some notes about workflow so that I can refer back to them in the future. I'm currently working my way through David Robinson's screen casts of working through a Tidy Tuesday data set. 
+
+There are a number of ways to bring in the data. I can copy and paste the code as I have done here. I can clone the repository (don't know how to do this yet, but I'm sure I'll figure it out). You can also get a URL from GitHub directly. If you click on the CSV file, it opens up the file into a screen with a URL and the raw data. That URL can be used with read_csv as I have done below.
+
+Nice to see that I am doing things right by working in R projects and R Markdown.
+
+```{r data-import}
+
+murders <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-12-10/international_murders.csv")
+
+gun_murders <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-12-10/gun_murders.csv")
+
+diseases <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-12-10/diseases.csv")
+
+nyc_regents <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-12-10/nyc_regents.csv")
+
+
+```
+
+``` {r summarize}
+diseases %>%
+  view()
+
+```
