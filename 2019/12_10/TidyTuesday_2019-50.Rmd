@@ -7,7 +7,10 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 library(tidyverse)
+library(ggplot2)
+
 ```
 
 ## Tidy Tuesday Week 50
@@ -33,7 +36,33 @@ nyc_regents <- readr::read_csv("https://raw.githubusercontent.com/rfordatascienc
 ```
 
 ``` {r summarize}
-diseases %>%
-  view()
 
+measles <- diseases %>%
+  filter(disease == "Measles") %>%
+  mutate(rate = (count/population * 100) * (52/weeks_reporting * 100)) %>%
+  filter(!state == "Hawaii",
+         !state == "Alaska") %>%
+  mutate(state = reorder(state, desc(state)))
+
+my.colors <- colorRampPalette(c("#f0ffff","#d0e9fb","#6ea6f0","#fbe204","#ffad00", "#fc2500", "#7f0d00"), bias = 2.4)
+
+measles %>%
+  ggplot(aes(year, state, fill = rate)) +
+  geom_tile(width = .9, height = .9) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_fill_gradientn(colors = my.colors(18), na.value = "white") +
+  geom_vline(xintercept = 1963) +
+  ggtitle("Measles") +
+  ylab("") +
+  xlab("") +
+  theme_minimal() +
+  theme(panel.grid = element_blank(),
+     legend.position = "bottom", text = element_text(size = 8),
+     plot.title = element_text(size = 12)) +
+  annotate(geom = "text", x = 1963, y = 50.5, label = "Vaccine introduced", size = 3, hjust = 0)
+
+ggsave("measles.jpg", width = 8, height = 6, units = "in")
 ```
+Alright!  I like it. I still haven't figured out how to not cut off the top of my annotated words "Vaccine introduced", but that'll have to be for another time.  I also would go and work on the margins a bit more. I 
+  
+  I'm now thinking about how to convey some of my work data in this way, too. So it's been very helpful! 
