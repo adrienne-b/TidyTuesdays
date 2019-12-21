@@ -9,11 +9,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
+library(knitr)
+library(kableExtra)
 
 
 ```
 
-```{r}
+```{r message=FALSE}
 # Get the Data
 
 dog_moves <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-12-17/dog_moves.csv')
@@ -24,37 +26,54 @@ dog_descriptions <- readr::read_csv('https://raw.githubusercontent.com/rfordatas
 
 Checking out dog_descrptions, there's some immediate questions that pop up. Is there one sex of dog that is more often found at shelters? Which age of dog is more common? Does sex relate to breed, i.e. are there some breeds that people don't want males or females of over others? What pure breeds end up in the pound? 
 
-First, lets look at sex of dogs found at the pound
-```{r}
-
-
+First, lets look at sex of dogs found at the pound.
+```{r count of dogs sex}
 dogs_sex <- dog_descriptions %>%
   filter(!sex == "Unknown") %>%
-  group_by(sex) %>%
-  count(sex) %>%
-  ungroup()
+  count(sex)
 
+kable(dogs_sex) %>%
+  kable_styling(full_width = FALSE, position = "left")
+```  
+Are those values significantly different than 50% representation of sexes?
+
+An exact binomial test will tell us. We use an exact binomial test when we have categorical data with only two categories in a single samle.
+It's an exact test. There's no f statistic, no distribution.
+
+
+``` {r binomial test}
 percent <- c(dogs_sex$n[1]/sum(dogs_sex$n), dogs_sex$n[2]/sum(dogs_sex$n))
 binom_f <- binom.test(dogs_sex$n[1],(dogs_sex$n[1] + dogs_sex$n[2]),0.5)
 binom_m <- binom.test(dogs_sex$n[2],(dogs_sex$n[1] + dogs_sex$n[2]),0.5)
 
+binom_f
+```
+
+So, we have a significance that tells us the amount of females is significantly different from 50%. 
+This also gives us the 95% CI. 
+
+```{r}
 pvalue <- c(binom_f[[3]], binom_m[[3]])
 conf_low  <- c(binom_f[[4]][[1]], binom_m[[4]][[1]])
 conf_high <- c(binom_f[[4]][[2]], binom_m[[4]][[2]])
 
-true_low <- confidence_low * sum(dogs_sex$n)
-true_high <- confidence_high * sum(dogs_sex$n)
+true_low <- conf_low * sum(dogs_sex$n)
+true_high <- conf_high * sum(dogs_sex$n)
 
-dogs_sex %>%
-  mutate(percent   = percent,
-         p         = pvalue,
-         conf_low  = conf_low,
-         conf_high = conf_high,
-         true_low  = true_low,
-         true_high = true_high)
+dogs_sex <- dogs_sex %>%
+               mutate(percent   = percent,
+                      p         = pvalue,
+                      conf_low  = conf_low,
+                      conf_high = conf_high,
+                      true_low  = true_low,
+                      true_high = true_high)
+
+kable(dogs_sex) %>%
+  kable_styling(full_width = FALSE, position = "left")
 ```
 
-``` {r}
+
+``` {r graph, echo=FALSE}
 dogs_sex %>%
 ggplot(aes(sex, n)) +
   geom_bar(stat = "identity", fill = "lightblue", width = 0.5) +
@@ -62,3 +81,4 @@ ggplot(aes(sex, n)) +
 
 ```
 
+Male dogs make up `r round(dogs_sex$percent[2]*100,0)` percent of the animals found at the pound. This means they are `r round((dogs_sex$percent[2]-dogs_sex$percent[1])*100,0)` percent more likely to be taken to the pound.  
