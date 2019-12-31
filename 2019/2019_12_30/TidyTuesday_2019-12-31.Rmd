@@ -1,0 +1,77 @@
+---
+title: "TidyTuesday_2019_12_31"
+author: "Adrienne"
+date: "December 30, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(lubridate)
+
+theme_set(theme_light())
+
+```
+
+
+```{r data import and clean}
+
+christmas_songs <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-12-24/christmas_songs.csv")
+
+christmas_lyrics <- readr::read_tsv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-12-24/christmas_lyrics.tsv")
+
+
+christmas_songs <- christmas_songs %>%
+  mutate(weekid = mdy(weekid))
+
+```
+
+```{r exploration}
+head(christmas_lyrics)
+head(christmas_songs)
+
+summary(christmas_songs$year)
+christmas_songs %>%
+  count(songid, sort = T)
+
+christmas_songs %>%
+  ggplot(aes(month)) +
+  geom_histogram(bins = 12)
+  
+
+
+```
+
+Note that there are some mistakes in the data set. Some $ for S.  
+
+Questions that arise:
+How many new songs are released yearly?  
+Which songs are still played years after they are released?
+How many different musicians are popular within a given year?
+What are the highest numbers of weeks on the charts for some songs?
+How long do some Christmas songs last after Christmas?
+
+I think we're going to find some surprises in here!
+
+
+First, how many popular songs are there in a given year?
+
+We saw from the histogram above, that the only months with data are November, December, and January. So. I could just consider the months of November and December and be fairly certain that I have captured that year's songs.
+```{r}
+songs_year <- christmas_songs %>%
+                filter(month > 1) %>%
+                select(songid, year) %>%
+                count(year)
+
+songs_year %>%
+  ggplot(aes(year, n)) +
+  geom_bar(stat = "identity") +
+  ylab("number of popular Christmas songs")
+
+
+
+```
+
+First, how many new Christmas songs are released yearly?
+I don't have data for the release date, so we will have to assume that the first time it's on the charts is the year it was released.
